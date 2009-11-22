@@ -46,6 +46,17 @@ public class DynamicMessagesTest extends Benchmark {
 	}
 
 	/**
+	 * Tests enum localization (programmatic localization example).
+	 */
+	public void testEnumLocalization() {
+		for (MyEnum e : MyEnum.values()) {
+			// Messages are the same as the enum constants - for easy asserts
+			String label = Messages.get("myEnum." + e.ordinal());
+			assertEquals(e.name(), label);
+		}
+	}
+
+	/**
 	 * Static string localization benchmark.
 	 */
 	public void testStaticMessageBenchmark() {
