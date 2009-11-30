@@ -113,7 +113,7 @@ public class Messages {
 	public static native String get(String key)
 	/*-{
 		var value = $wnd['messages'][key];
-		return value == null ? String(key) : String(value);
+		return value == null ? key : value;
 	}-*/;
 
 	private static native String get(String key, JsArrayString args)
