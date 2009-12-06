@@ -7,9 +7,9 @@ It is quite impossible to measure, because the static messages benchmark reports
 
 ||*Test name*||*Time (ms) (no args)*||*Time (ms) (3 args)*||
 ||GWT Messages||*-0.31*||*1.28*||
-||Dynamic Messages||*31.61*||*280.98*||
+||Dynamic Messages||*31.61*||*85.64*||
 
-Of course, the introduced method call made things considerably slower than inlining. The parametric version is horrific for some unknown reason, most probably the argument processing javascript is not as optimal as the GWT generated one, yet.
+Of course, the introduced method call made things considerably slower than inlining.
 
 Please note that these times were recorded in a hosted mode environment (considered much slower than a browser). If you point me towards a proper javascript profiler, I promise I'll try it out. (The computer is a 3GHz Core2 Duo btw).
 
