@@ -19,7 +19,6 @@ import com.google.gwt.core.ext.TreeLogger.Type;
 import com.google.gwt.core.ext.typeinfo.JClassType;
 import com.google.gwt.core.ext.typeinfo.NotFoundException;
 import com.google.gwt.core.ext.typeinfo.TypeOracle;
-import com.google.gwt.i18n.client.impl.LocaleInfoImpl;
 import com.google.gwt.user.rebind.ClassSourceFileComposerFactory;
 import com.google.gwt.user.rebind.SourceWriter;
 
@@ -42,8 +41,12 @@ public class DynamicMessagesGenerator extends Generator {
 	 */
 	private static final String PROP_LOCALE = "locale";
 
+	/**
+	 * The token representing the message bundles.
+	 */
+	private static final String PROP_MESSAGEBUNDLES = "messageBundles";
+
 	@Override
-	@SuppressWarnings("unchecked")
 	public String generate(TreeLogger logger, GeneratorContext context, String typeName)
 			throws UnableToCompleteException {
 		logger.log(Type.TRACE, "Entering DMG.generate()");
@@ -58,7 +61,17 @@ public class DynamicMessagesGenerator extends Generator {
 		} catch (BadPropertyValueException e) {
 			logger.log(TreeLogger.TRACE, "MessageBundle used without I18N module, using defaults",
 					e);
-			return LocaleInfoImpl.class.getName();
+			locale = "default";
+		}
+
+		String[] bundles;
+
+		try {
+			bundles = propertyOracle.getPropertyValueSet(logger, PROP_MESSAGEBUNDLES);
+		} catch (BadPropertyValueException e) {
+			logger.log(TreeLogger.ERROR, PROP_MESSAGEBUNDLES + " should be defined. "
+					+ "Maybe you did not inherit from the DynamicMessages module.");
+			throw new UnableToCompleteException();
 		}
 
 		JClassType targetClass;
@@ -76,8 +89,6 @@ public class DynamicMessagesGenerator extends Generator {
 			className += locale;
 		}
 		String qualName = packageName + "." + className;
-		String properties = locale.equals("default") ? "Messages.properties" : "Messages_" + locale
-				+ ".properties";
 
 		PrintWriter pw = context.tryCreate(logger, packageName, className);
 		if (pw != null) {
@@ -88,26 +99,62 @@ public class DynamicMessagesGenerator extends Generator {
 			SourceWriter writer = factory.createSourceWriter(context, pw);
 			writer.println("public native void load() /*-{");
 			writer.println("  $wnd['messages'] = {");
+
+			appendBundles(logger, writer, locale, bundles);
+
+			writer.println("  }");
+			writer.println("}-*/;");
+
+			writer.commit(logger);
+		}
+
+		return qualName;
+	}
+
+	@SuppressWarnings("unchecked")
+	private void appendBundles(TreeLogger logger, SourceWriter writer, String locale,
+			String[] bundles) throws UnableToCompleteException {
+
+		if (bundles.length == 1) {
+			// In case the messageBundles property is not extended, we use
+			// Messages as the default bundle
+			bundles[0] = "Messages";
+		}
+
+		boolean first = true;
+		for (int i = 0; i < bundles.length; i++) {
+			String bundle = bundles[i];
+
+			if (bundle.equals("_")) {
+				// The empty default is ignored
+				continue;
+			}
+
+			String localizedBundle = locale.equals("default") ? bundle + ".properties" : bundle
+					+ "_" + locale + ".properties";
 			LocalizedProperties messages = new LocalizedProperties();
 
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream str = null;
 			try {
-				str = classLoader.getResourceAsStream(properties);
+				str = classLoader.getResourceAsStream(localizedBundle);
 				if (str != null) {
 					messages.load(str, "UTF-8");
+				} else {
+					logger.log(TreeLogger.ERROR, "Message bundle not found: " + localizedBundle);
+					throw new UnableToCompleteException();
 				}
 			} catch (UnsupportedEncodingException e) {
 				// UTF-8 should always be defined
 				logger.log(TreeLogger.ERROR, "UTF-8 encoding is not defined", e);
 				throw new UnableToCompleteException();
 			} catch (IOException e) {
-				logger.log(TreeLogger.ERROR, "Exception reading messages", e);
+				logger.log(TreeLogger.ERROR, "Failed to read messages from bundle: "
+						+ localizedBundle, e);
 				throw new UnableToCompleteException();
 			}
 
 			Map<String, String> msgs = messages.getPropertyMap();
-			boolean first = true;
 			for (Entry<String, String> entry : msgs.entrySet()) {
 				String key = entry.getKey().replaceAll("\"", "\\\"");
 				String value = entry.getValue().replaceAll("\"", "\\\"");
@@ -120,14 +167,7 @@ public class DynamicMessagesGenerator extends Generator {
 
 				writer.print("    \"" + key + "\": \"" + value + "\"");
 			}
-
-			writer.println("  }");
-			writer.println("}-*/;");
-
-			writer.commit(logger);
 		}
-
-		return qualName;
 	}
 
 }
