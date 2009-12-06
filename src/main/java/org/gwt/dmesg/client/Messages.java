@@ -28,13 +28,19 @@ import com.google.gwt.core.client.JsArrayString;
  * <p>
  * Notes:<br>
  * <ul>
- * <li>Currently, because how deferred binding works, <b>only one property
- * bundle</b> is supported, which must be named <b>Messages</b>
- * (Messages.properties, Messages_en.properties, etc.).
- * <li>The bundle must be accessible as a class path resource - at the root of
+ * <li>The default bundle is called <b>Messages</b> (Messages.properties,
+ * Messages_en.properties, etc.) it is used when you don't specify any bundles.
+ * <li>You may specify additional bundles using the <code>messageBundles</code>
+ * property in your {module}.gwt.xml descriptor. <b>If you extend this property,
+ * you must specify all your bundles</b> (including Messages if you used that as
+ * well).
+ * <li>The bundles must be accessible as a class path resource - at the root of
  * the classpath (*.properties should be placed in the root of the JAR/WAR)
- * <li>The global JavaScript variable <code>$wnd['messages']</code> will contain the bundle - this
- * poses a possible conflict with other, user-defined JS variables
+ * <li>The global JavaScript variable <code>$wnd['messages']</code> will contain the bundles -
+ * this poses a possible conflict with other, user-defined JS variables
+ * <li>Message bundles won't have namespaces. If you define the same key in more
+ * bundles, then the last one will be used (assuming the order you specified
+ * them in the module xmls).
  * </ul>
  * </p>
  * 
@@ -88,14 +94,14 @@ public class Messages {
 	 * @since 1.0
 	 */
 	public static String get(String key, Object... args) {
+		String value = get(key);
 		if (args == null) {
-			return get(key);
+			return value;
 		} else {
-			JsArrayString arr = (JsArrayString) JsArrayString.createArray();
 			for (int i = 0; i < args.length; i++) {
-				arr.set(i, args[i].toString());
+				value = value.replace("{" + i + "}", args[i].toString());
 			}
-			return get(key, arr);
+			return value;
 		}
 	}
 
@@ -114,20 +120,5 @@ public class Messages {
 	/*-{
 		var value = $wnd['messages'][key];
 		return value == null ? key : value;
-	}-*/;
-
-	private static native String get(String key, JsArrayString args)
-	/*-{
-		var value = $wnd['messages'][key];
-		if (value == null) return String(key);
-		
-		if (args != null) {
-			//Note: only the first occurrence is replaced!
-			for ( i=0; i < args.length; i++) {
-				value = value.replace('{'+i+'}', args[i]);
-			}
-		}
-		
-		return String(value);
 	}-*/;
 }

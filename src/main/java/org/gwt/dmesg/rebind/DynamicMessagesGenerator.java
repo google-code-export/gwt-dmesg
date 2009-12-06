@@ -121,6 +121,8 @@ public class DynamicMessagesGenerator extends Generator {
 			bundles[0] = "Messages";
 		}
 
+		LocalizedProperties messages = new LocalizedProperties();
+
 		boolean first = true;
 		for (int i = 0; i < bundles.length; i++) {
 			String bundle = bundles[i];
@@ -132,7 +134,6 @@ public class DynamicMessagesGenerator extends Generator {
 
 			String localizedBundle = locale.equals("default") ? bundle + ".properties" : bundle
 					+ "_" + locale + ".properties";
-			LocalizedProperties messages = new LocalizedProperties();
 
 			ClassLoader classLoader = getClass().getClassLoader();
 			InputStream str = null;
@@ -153,20 +154,20 @@ public class DynamicMessagesGenerator extends Generator {
 						+ localizedBundle, e);
 				throw new UnableToCompleteException();
 			}
+		}
 
-			Map<String, String> msgs = messages.getPropertyMap();
-			for (Entry<String, String> entry : msgs.entrySet()) {
-				String key = entry.getKey().replaceAll("\"", "\\\"");
-				String value = entry.getValue().replaceAll("\"", "\\\"");
+		Map<String, String> msgs = messages.getPropertyMap();
+		for (Entry<String, String> entry : msgs.entrySet()) {
+			String key = entry.getKey().replaceAll("\"", "\\\"");
+			String value = entry.getValue().replaceAll("\"", "\\\"");
 
-				if (first) {
-					first = false;
-				} else {
-					writer.println(",");
-				}
-
-				writer.print("    \"" + key + "\": \"" + value + "\"");
+			if (first) {
+				first = false;
+			} else {
+				writer.println(",");
 			}
+
+			writer.print("    \"" + key + "\": \"" + value + "\"");
 		}
 	}
 
