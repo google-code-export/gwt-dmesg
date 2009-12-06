@@ -43,6 +43,9 @@ public class DynamicMessagesTest extends Benchmark {
 
 		// UTF-8 encoding test
 		assertEquals("áéíóőúű", Messages.get("utf8"));
+
+		// Different bundle test
+		assertEquals("test", Messages.get("from.another.bundle"));
 	}
 
 	/**
