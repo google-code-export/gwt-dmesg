@@ -1,7 +1,6 @@
 package org.gwt.dmesg.client;
 
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.core.client.JsArrayString;
 
 /**
  * Dynamic message source for Google Web Toolkit.
