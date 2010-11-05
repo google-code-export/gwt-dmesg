@@ -2,16 +2,16 @@
 #labels Phase-Design
 
 =Yep, it's slower=
-Compared to static messages, loading 1000 messages is considerably slower when using Dynamic Messages.
+Compared to static messages, loading 1000 messages is considerably slower when using Dynamic Messages (updated with GWT 2.0.3 benchmark data).
 It is quite impossible to measure, because the static messages benchmark reports a negative value (most probably a timing error), but here are the results:
 
 ||*Test name*||*Time (ms) (no args)*||*Time (ms) (3 args)*||
-||GWT Messages||*-0.31*||*1.28*||
-||Dynamic Messages||*31.61*||*85.64*||
+||GWT Messages||*-0.04*||*1.18*||
+||Dynamic Messages||*53.45*||*59.96*||
 
 Of course, the introduced method call made things considerably slower than inlining.
 
-Please note that these times were recorded in a hosted mode environment (considered much slower than a browser). If you point me towards a proper javascript profiler, I promise I'll try it out. (The computer is a 3GHz Core2 Duo btw).
+Please note that these times were recorded in a development mode environment (considered slower than a browser). If you point me towards a proper javascript profiler, I promise I'll try it out. (The computer is a 3GHz Core2 Duo btw).
 
 =Yep, it's bigger=
 Because every message is now a function call instead of an inlined string, we have grown a few bytes. Obfuscated code may look like:
