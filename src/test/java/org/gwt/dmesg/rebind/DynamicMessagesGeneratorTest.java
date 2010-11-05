@@ -14,7 +14,6 @@ import com.google.gwt.dev.Compiler;
  * A test case for validating expected generated JavaScript output.
  * 
  * @author Gergely Kiss
- * 
  */
 public class DynamicMessagesGeneratorTest {
 
@@ -34,9 +33,8 @@ public class DynamicMessagesGeneratorTest {
 			FileUtils.deleteQuietly(genDir);
 			FileUtils.forceMkdir(genDir);
 
-			String[] args = { "-logLevel", "DEBUG", "-gen", genDir.getAbsolutePath(), "-style",
-					"DETAILED", "-war",
-					genDir.getAbsolutePath(), module };
+			String[] args = { "-logLevel", "INFO", "-gen", genDir.getAbsolutePath(), "-style",
+					"DETAILED", "-war", genDir.getAbsolutePath(), module };
 			Compiler.main(args);
 		} catch (IOException e) {
 			e.printStackTrace();
