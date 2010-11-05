@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -24,15 +25,13 @@ import com.google.gwt.user.rebind.SourceWriter;
 
 /**
  * Dynamic message generator.
- * 
  * <p>
- * Generates <code>$wnd['messages'] = { ... };</code> blocks based on the locale, for dynamic i18n support.
+ * Generates <code>$wnd['messages'] = { ... };</code> blocks based on the
+ * locale, for dynamic i18n support.
  * </p>
  * 
  * @since 1.0
- * 
  * @author Gergely Kiss
- * 
  * @see org.gwt.dmesg.client.MessageBundleImpl
  */
 public class DynamicMessagesGenerator extends Generator {
@@ -57,21 +56,28 @@ public class DynamicMessagesGenerator extends Generator {
 		String locale = null;
 
 		try {
-			locale = propertyOracle.getPropertyValue(logger, PROP_LOCALE);
+			locale = propertyOracle.getSelectionProperty(logger, PROP_LOCALE).getCurrentValue();
 		} catch (BadPropertyValueException e) {
 			logger.log(TreeLogger.TRACE, "MessageBundle used without I18N module, using defaults",
 					e);
 			locale = "default";
 		}
 
-		String[] bundles;
+		List<String> bundles;
 
 		try {
-			bundles = propertyOracle.getPropertyValueSet(logger, PROP_MESSAGEBUNDLES);
+			bundles = propertyOracle.getConfigurationProperty(PROP_MESSAGEBUNDLES).getValues();
 		} catch (BadPropertyValueException e) {
-			logger.log(TreeLogger.ERROR, PROP_MESSAGEBUNDLES + " should be defined. "
-					+ "Maybe you did not inherit from the DynamicMessages module.");
+			logger.log(TreeLogger.ERROR, PROP_MESSAGEBUNDLES
+					+ " should be defined with 'set-configuration-property'. "
+					+ "Please also check that you inherited from the DynamicMessages module.");
 			throw new UnableToCompleteException();
+		}
+
+		if (bundles.isEmpty()) {
+			logger.log(TreeLogger.INFO, "No bundles specified in configuration property "
+					+ PROP_MESSAGEBUNDLES + " using 'Messages'");
+			bundles.add(0, "Messages");
 		}
 
 		JClassType targetClass;
@@ -113,25 +119,12 @@ public class DynamicMessagesGenerator extends Generator {
 
 	@SuppressWarnings("unchecked")
 	private void appendBundles(TreeLogger logger, SourceWriter writer, String locale,
-			String[] bundles) throws UnableToCompleteException {
-
-		if (bundles.length == 1) {
-			// In case the messageBundles property is not extended, we use
-			// Messages as the default bundle
-			bundles[0] = "Messages";
-		}
+			List<String> bundles) throws UnableToCompleteException {
 
 		LocalizedProperties messages = new LocalizedProperties();
 
 		boolean first = true;
-		for (int i = 0; i < bundles.length; i++) {
-			String bundle = bundles[i];
-
-			if (bundle.equals("_")) {
-				// The empty default is ignored
-				continue;
-			}
-
+		for (String bundle : bundles) {
 			String localizedBundle = locale.equals("default") ? bundle + ".properties" : bundle
 					+ "_" + locale + ".properties";
 
