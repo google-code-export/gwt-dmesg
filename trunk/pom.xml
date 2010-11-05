@@ -10,7 +10,7 @@
 	<description>Dynamic message support for Google Web Toolkit applications</description>
 
 	<scm>
-		<connection>scm:svn:https://gwt-dmesg.googlecode.com/svn</connection>
+		<developerConnection>scm:svn:https://gwt-dmesg.googlecode.com/svn</developerConnection>
 	</scm>
 
 	<properties>
