@@ -1,11 +1,12 @@
-<!DOCTYPE module PUBLIC "//gwt-module/" "http://google-web-toolkit.googlecode.com/svn/tags/1.6.2/distro-source/core/src/gwt-module.dtd">
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.3//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.3/distro-source/core/src/gwt-module.dtd">
 <module>
 
-	<!-- Inherit the core Web Toolkit stuff.                        -->
+	<!-- Inherit the core Web Toolkit stuff. -->
 	<inherits name='com.google.gwt.user.User' />
 
 	<inherits name="com.google.gwt.i18n.I18N" />
 	<inherits name="org.gwt.dmesg.DynamicMessages" />
 	
-	<extend-property name="messageBundles" values="Messages,OtherBundle"/>
+	<extend-configuration-property name="messageBundles" value="Messages"/>
+	<extend-configuration-property name="messageBundles" value="OtherBundle"/>
 </module>
