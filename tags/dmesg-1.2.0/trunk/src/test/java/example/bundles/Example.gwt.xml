@@ -1,0 +1,8 @@
+<!DOCTYPE module PUBLIC "-//Google Inc.//DTD Google Web Toolkit 2.0.3//EN" "http://google-web-toolkit.googlecode.com/svn/tags/2.0.3/distro-source/core/src/gwt-module.dtd">
+<module rename-to="example.bundles">
+	<inherits name="example.bundles.Inherited" />
+
+	<extend-property name="messageBundles" values="MyOtherBundle"/>
+	
+	<entry-point class="example.bundles.client.Module"/>
+</module>

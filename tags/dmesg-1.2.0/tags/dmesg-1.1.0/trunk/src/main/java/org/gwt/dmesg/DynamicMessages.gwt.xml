@@ -1,0 +1,9 @@
+<!DOCTYPE module PUBLIC "//gwt-module/" "http://google-web-toolkit.googlecode.com/svn/tags/1.6.2/distro-source/core/src/gwt-module.dtd">
+<module>
+	<!-- This is a hack, so the property can be "empty" by default -->
+	<define-property name="messageBundles" values="_"/>
+
+	<generate-with class="org.gwt.dmesg.rebind.DynamicMessagesGenerator">
+		<when-type-is class="org.gwt.dmesg.client.MessageBundleImpl" />
+	</generate-with>
+</module>

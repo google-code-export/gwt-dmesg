@@ -1,0 +1,53 @@
+#summary Thoughts about GWT message handling, design considerations and other BS.
+#labels Phase-Design
+
+=GWT messages=
+I believe Google has created message handling the way it is for some very good reasons. With static messages the script size, execution time, and even the compile time is optional. Hell, the benchmark I wrote came up with a small *negative* exec time for static messages... :)
+
+Unfortunately, these benefits are a result of some die-hard optimization, which has side effects on the architecture. *Everything* is done with Deferred Binding - browser compatibility, dependency injection, locales, currencies, images and messages. And Deferred Binding requires you to *generate Java code before you can generate javascript*.
+
+I repeat: there is currently *no way to inject custom javascript* in either the nocache.js, or the browser-specific js (other than Deferred Binding of course).
+
+===What's the big deal?===
+As we know, dynamic loading in the javascript world is not possible - or at least reasonably hard not to do it. But messages are the best example of a *resource* that needs to be *loaded* *programmatically* (by locale).
+
+In the browser world, we could only load our messages with some custom javascript (other js frameworks came to the same conclusion as well). So let's use Deferred Binding for that! But...
+
+===Deferred Binding can only "see" types and interfaces===
+First stop: it's not possible to inline a lookup method, because it would require the introspection of the input parameters. While this could be possible for some simple cases, it's not implemented in GWT (see com.google.gwt.core.ext.Generator).
+
+No problem, let's write a Message *type*, with Java *functions* for each message, *so the compiler can load the message keys*. A great idea, indeed, but we did that only because the compiler does not support custom javascript injection.
+
+It's a hack.
+
+Now, because Deferred Binding, the message constants are *multiplicated through every permutation* (browser, locale, and your custom properties). But it's not really a problem, because we have lots of space on the web server, and the user has to download only one of the permutations of your software.
+
+=The problem=
+You'll have to develop and maintain that software :)
+
+===Code is duplicated===
+The message keys must be both declared in the Messages class and in the .properties. If you forget to duplicate the key in the properties file, compilation will fail, and trust me, you will. It's annoying.
+
+===Lost dynamism===
+Because the compiler hardwires everything for you, you can't localize a simple thing as an enum anymore.
+
+Yes you can use Constants, Messages and even ConstantsWithLookup. Different approaches to solve the same problem (maybe call it MessagesWithLookup?) while their implementations are polluting your code.
+
+===It's ugly===
+Poked my eye since day one. Seriously... _functions for messages_? *It's like writing a getter for every key of a HashMap.*
+
+It can also grow very long in a short time. Take a look at this:
+{{{
+  /**
+   * I need to write a comment so I know what the hell this is.
+   * 
+   * @param  Also, I need to comment this to have a hint
+   * @param  And this one as well
+   */
+  public String mySpecialLabel(String name, int value);
+}}}
+Aren't things better in context? (Note you have to write *both* of these with static messages)
+{{{
+  my.special.label=Looks like your friend {0} has just turned {1}! Happy Birthday to her!
+}}}
+Apart from that now I can *see* what the hell it is, it's *one* line, instead of 7. You'll thank me when you have 200 messages to look after :)
