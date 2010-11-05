@@ -75,8 +75,8 @@ public class DynamicMessagesGenerator extends Generator {
 		}
 
 		if (bundles.isEmpty()) {
-			logger.log(TreeLogger.INFO, "No bundles specified in configuration property "
-					+ PROP_MESSAGEBUNDLES + " using 'Messages'");
+			logger.log(TreeLogger.TRACE, "No bundles specified in configuration property "
+					+ PROP_MESSAGEBUNDLES + ". Using 'Messages'");
 			bundles.add(0, "Messages");
 		}
 
